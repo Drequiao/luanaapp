@@ -4,9 +4,15 @@ import { storageGet, storageSet, genId } from '../utils/storage';
 const AppContext = createContext(null);
 
 export function AppProvider({ children }) {
-  const [clientes, setClientes] = useState(() =>
-    JSON.parse(storageGet('ld_clientes') || '[]')
-  );
+  const [clientes, setClientes] = useState(() => {
+    try {
+      const raw = storageGet('ld_clientes');
+      const parsed = raw ? JSON.parse(raw) : [];
+      return Array.isArray(parsed) ? parsed : [];
+    } catch {
+      return [];
+    }
+  });
 
   // drawer: null | { type: 'cliente'|'detalhe'|'dia', data: any }
   const [drawer, setDrawer] = useState(null);
@@ -23,9 +29,12 @@ export function AppProvider({ children }) {
     );
   }, []);
 
-  const persistClientes = useCallback((next) => {
-    setClientes(next);
-    storageSet('ld_clientes', JSON.stringify(next));
+  const persistClientes = useCallback((updater) => {
+    setClientes(prev => {
+      const next = typeof updater === 'function' ? updater(prev) : updater;
+      storageSet('ld_clientes', JSON.stringify(next));
+      return next;
+    });
   }, []);
 
   const addCliente = useCallback((data) => {
