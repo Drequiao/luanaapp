@@ -1,14 +1,28 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useApp } from '../../context/AppContext';
 import Badge from '../ui/Badge';
-import { fmtDate, fmt } from '../../utils/format';
+import { fmtDate, fmt, statusLabels } from '../../utils/format';
+
+const STATUS_KEYS = ['orcamento', 'sinal', 'agendado', 'concluido', 'cancelado'];
 
 export default function Clientes() {
   const { clientes, openDrawer } = useApp();
   const [search, setSearch] = useState('');
+  const [statusFilter, setStatusFilter] = useState(null);
+
+  // Contagem por status (para as pills)
+  const counts = useMemo(() => {
+    const map = {};
+    for (const key of STATUS_KEYS) map[key] = 0;
+    for (const c of clientes) {
+      if (c.status && map[c.status] !== undefined) map[c.status]++;
+    }
+    return map;
+  }, [clientes]);
 
   const f = search.toLowerCase();
   const filtered = clientes
+    .filter(c => !statusFilter || c.status === statusFilter)
     .filter(c => !f || c.nome.toLowerCase().includes(f) || (c.projeto || '').toLowerCase().includes(f))
     .sort((a, b) => (b.criadoEm || 0) - (a.criadoEm || 0));
 
@@ -17,10 +31,38 @@ export default function Clientes() {
     clientes.length === 1 ? '1 cliente' :
     `${clientes.length} clientes`;
 
+  // Labels curtos para as pills
+  const pillLabels = {
+    orcamento: 'Orçamento',
+    sinal: 'Sinal',
+    agendado: 'Agendado',
+    concluido: 'Concluído',
+    cancelado: 'Cancelado',
+  };
+
   return (
     <div>
       <div className="section-title"><span>Clientes</span></div>
       <div className="section-sub">{countLabel}</div>
+
+      {/* Filtros por status */}
+      <div className="filter-bar">
+        <button
+          className={`filter-pill filter-pill-todos${!statusFilter ? ' active' : ''}`}
+          onClick={() => setStatusFilter(null)}
+        >
+          Todos ({clientes.length})
+        </button>
+        {STATUS_KEYS.map(key => (
+          <button
+            key={key}
+            className={`filter-pill filter-pill-${key}${statusFilter === key ? ' active' : ''}`}
+            onClick={() => setStatusFilter(statusFilter === key ? null : key)}
+          >
+            {pillLabels[key]} ({counts[key]})
+          </button>
+        ))}
+      </div>
 
       <div className="search-bar">
         <input
@@ -35,8 +77,8 @@ export default function Clientes() {
         <div className="empty-state">
           <div className="empty-icon">🔍</div>
           <p>
-            {search
-              ? `Nenhum resultado para "${search}"`
+            {search || statusFilter
+              ? 'Nenhum cliente encontrado com esses filtros'
               : 'Toque no ＋ para adicionar o primeiro cliente!'}
           </p>
         </div>
