@@ -1,9 +1,11 @@
+import { useRef } from 'react';
 import { useApp } from '../../context/AppContext';
 import Badge from '../ui/Badge';
 import { fmt, fmtDate, monthNames, dayNamesFull, statusDots } from '../../utils/format';
 
 export default function Dashboard() {
-  const { clientes, openDrawer } = useApp();
+  const { clientes, openDrawer, importClientes, showToast } = useApp();
+  const fileRef = useRef(null);
 
   const today = new Date();
   const mo = today.getMonth();
@@ -39,6 +41,45 @@ export default function Dashboard() {
   const proxima = clientes
     .filter(c => c.data && c.status !== 'cancelado' && c.status !== 'concluido')
     .sort((a, b) => a.data.localeCompare(b.data))[0];
+
+  function handleExport() {
+    const json = JSON.stringify(clientes, null, 2);
+    const blob = new Blob([json], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    const date = new Date().toISOString().split('T')[0];
+    a.href = url;
+    a.download = `luanaapp-backup-${date}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+    showToast(`✓ Backup exportado (${clientes.length} clientes)`);
+  }
+
+  function handleImport(e) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (evt) => {
+      try {
+        const data = JSON.parse(evt.target.result);
+        if (!Array.isArray(data)) {
+          showToast('Arquivo inválido: esperado uma lista de clientes.', true);
+          return;
+        }
+        const confirm = window.confirm(
+          `Importar ${data.length} clientes? Isso vai substituir todos os dados atuais.`
+        );
+        if (confirm) {
+          importClientes(data);
+        }
+      } catch {
+        showToast('Erro ao ler o arquivo. Verifique o formato.', true);
+      }
+      // Reset input pra permitir reimportar o mesmo arquivo
+      if (fileRef.current) fileRef.current.value = '';
+    };
+    reader.readAsText(file);
+  }
 
   return (
     <div>
@@ -119,6 +160,31 @@ export default function Dashboard() {
         ) : (
           <div style={{ color: 'var(--text2)', fontSize: 14 }}>Nenhuma sessão agendada.</div>
         )}
+      </div>
+
+      {/* Backup */}
+      <div className="card" style={{ marginTop: 4 }}>
+        <div style={{ fontSize: 11, letterSpacing: '1.5px', textTransform: 'uppercase', color: 'var(--text3)', marginBottom: 14 }}>
+          🔒 Seus Dados
+        </div>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+          <button className="btn btn-secondary" onClick={handleExport}>
+            📤 Exportar
+          </button>
+          <button className="btn btn-secondary" onClick={() => fileRef.current?.click()}>
+            📥 Importar
+          </button>
+        </div>
+        <input
+          ref={fileRef}
+          type="file"
+          accept=".json"
+          style={{ display: 'none' }}
+          onChange={handleImport}
+        />
+        <div style={{ fontSize: 11, color: 'var(--text3)', marginTop: 10, lineHeight: 1.5 }}>
+          Exporte seus dados regularmente para não perder informações.
+        </div>
       </div>
     </div>
   );

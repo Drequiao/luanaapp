@@ -56,6 +56,13 @@ export function AppProvider({ children }) {
     showToast('Cliente excluído.');
   }, [persistClientes, showToast]);
 
+  const importClientes = useCallback((data) => {
+    if (!Array.isArray(data)) return false;
+    persistClientes(data);
+    showToast(`✓ ${data.length} clientes importados!`);
+    return true;
+  }, [persistClientes, showToast]);
+
   const openDrawer = useCallback((type, data = null) => {
     setDrawer({ type, data });
   }, []);
@@ -68,6 +75,7 @@ export function AppProvider({ children }) {
       addCliente,
       updateCliente,
       deleteCliente,
+      importClientes,
       drawer,
       openDrawer,
       closeDrawer,
