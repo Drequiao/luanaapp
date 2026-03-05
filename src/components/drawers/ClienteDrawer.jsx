@@ -3,7 +3,7 @@ import Drawer from '../ui/Drawer';
 import { useApp } from '../../context/AppContext';
 
 const empty = {
-  nome: '', wa: '', projeto: '', local: '', tamanho: '',
+  nome: '', wa: '', ig: '', projeto: '', local: '', tamanho: '',
   valor: '', sinal: '', data: '', hora: '', status: 'orcamento', obs: '',
 };
 
@@ -20,6 +20,7 @@ export default function ClienteDrawer() {
       setForm(editCliente ? {
         nome: editCliente.nome || '',
         wa: editCliente.wa || '',
+        ig: editCliente.ig || '',
         projeto: editCliente.projeto || '',
         local: editCliente.local || '',
         tamanho: editCliente.tamanho || '',
@@ -72,9 +73,15 @@ export default function ClienteDrawer() {
         <input className="form-input" value={form.nome} onChange={set('nome')} placeholder="Nome do cliente" />
       </div>
 
-      <div className="form-group">
-        <label className="form-label">WhatsApp</label>
-        <input className="form-input" value={form.wa} onChange={set('wa')} placeholder="(71) 99999-9999" type="tel" />
+      <div className="form-row">
+        <div className="form-group">
+          <label className="form-label">WhatsApp</label>
+          <input className="form-input" value={form.wa} onChange={set('wa')} placeholder="(71) 99999-9999" type="tel" />
+        </div>
+        <div className="form-group">
+          <label className="form-label">Instagram</label>
+          <input className="form-input" value={form.ig} onChange={set('ig')} placeholder="@usuario" />
+        </div>
       </div>
 
       <div className="form-group">

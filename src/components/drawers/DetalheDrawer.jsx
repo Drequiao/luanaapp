@@ -86,10 +86,31 @@ export default function DetalheDrawer() {
         </div>
       )}
 
-      {waNum && (
-        <a className="wa-btn" href={`https://wa.me/55${waNum}?text=${waMsg}`} target="_blank" rel="noreferrer">
-          📱 Abrir WhatsApp — {c.wa}
-        </a>
+      {/* Botões de contato */}
+      {(waNum || c.ig) && (
+        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+          {waNum && (
+            <a className="wa-btn" href={`https://wa.me/55${waNum}?text=${waMsg}`} target="_blank" rel="noreferrer" style={{ flex: 1, justifyContent: 'center' }}>
+              📱 WhatsApp
+            </a>
+          )}
+          {c.ig && (
+            <a
+              href={`https://instagram.com/${c.ig.replace(/^@/, '')}`}
+              target="_blank"
+              rel="noreferrer"
+              style={{
+                flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center',
+                gap: 8, background: '#2a1a3a', border: '1px solid #5a3a7a',
+                borderRadius: 'var(--radius-sm)', padding: '10px 14px',
+                color: '#c084fc', fontSize: 13, fontWeight: 500,
+                textDecoration: 'none', marginTop: 12, cursor: 'pointer',
+              }}
+            >
+              📷 {c.ig.startsWith('@') ? c.ig : `@${c.ig}`}
+            </a>
+          )}
+        </div>
       )}
 
       <button className="btn btn-secondary" style={{ marginTop: 16 }} onClick={closeDrawer}>
