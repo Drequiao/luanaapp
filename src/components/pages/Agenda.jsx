@@ -129,6 +129,20 @@ export default function Agenda() {
           <div style={{ color: 'var(--text3)', fontSize: 13, padding: '12px 0' }}>Dia livre ✨</div>
         )}
 
+        {selectedDay && (
+          <button
+            className="btn btn-primary"
+            style={{ marginBottom: 12, fontSize: 12, padding: 12 }}
+            onClick={() => {
+              const mm = String(calMonth + 1).padStart(2, '0');
+              const dd = String(selectedDay).padStart(2, '0');
+              openDrawer('cliente', { data: `${calYear}-${mm}-${dd}` });
+            }}
+          >
+            ＋ Sessão neste dia
+          </button>
+        )}
+
         {dayEvents.map(c => (
           <div
             key={c.id}

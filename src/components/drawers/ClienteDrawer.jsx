@@ -11,28 +11,35 @@ export default function ClienteDrawer() {
   const { drawer, closeDrawer, addCliente, updateCliente, deleteCliente, showToast } = useApp();
 
   const isOpen = drawer?.type === 'cliente';
-  const editCliente = drawer?.data || null; // null = new
+  const drawerData = drawer?.data || null;
+  // Se tem id, é edição; senão é novo (possivelmente com dados pré-preenchidos)
+  const editCliente = drawerData?.id ? drawerData : null;
+  const prefill = !editCliente ? drawerData : null;
 
   const [form, setForm] = useState(empty);
 
   useEffect(() => {
     if (isOpen) {
-      setForm(editCliente ? {
-        nome: editCliente.nome || '',
-        wa: editCliente.wa || '',
-        ig: editCliente.ig || '',
-        projeto: editCliente.projeto || '',
-        local: editCliente.local || '',
-        tamanho: editCliente.tamanho || '',
-        valor: editCliente.valor || '',
-        sinal: editCliente.sinal || '',
-        data: editCliente.data || '',
-        hora: editCliente.hora || '',
-        status: editCliente.status || 'orcamento',
-        obs: editCliente.obs || '',
-      } : empty);
+      if (editCliente) {
+        setForm({
+          nome: editCliente.nome || '',
+          wa: editCliente.wa || '',
+          ig: editCliente.ig || '',
+          projeto: editCliente.projeto || '',
+          local: editCliente.local || '',
+          tamanho: editCliente.tamanho || '',
+          valor: editCliente.valor || '',
+          sinal: editCliente.sinal || '',
+          data: editCliente.data || '',
+          hora: editCliente.hora || '',
+          status: editCliente.status || 'orcamento',
+          obs: editCliente.obs || '',
+        });
+      } else {
+        setForm({ ...empty, ...(prefill || {}) });
+      }
     }
-  }, [isOpen, editCliente]);
+  }, [isOpen, editCliente, prefill]);
 
   const set = (field) => (e) =>
     setForm(f => ({ ...f, [field]: e.target.value }));
@@ -40,7 +47,7 @@ export default function ClienteDrawer() {
   function handleSave() {
     if (!form.nome.trim()) { showToast('Nome é obrigatório!', true); return; }
     if (editCliente) {
-      updateCliente(editCliente.id, { ...form, criadoEm: editCliente.criadoEm });
+      updateCliente(editCliente.id, form);
     } else {
       addCliente(form);
     }
