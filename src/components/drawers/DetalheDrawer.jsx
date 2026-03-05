@@ -20,7 +20,7 @@ export default function DetalheDrawer() {
 
   function handleEdit() {
     closeDrawer();
-    setTimeout(() => openDrawer('cliente', c), 200);
+    setTimeout(() => openDrawer('cliente', c), 350);
   }
 
   return (

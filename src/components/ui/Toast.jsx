@@ -17,10 +17,12 @@ export default function Toast() {
         fontSize: 14,
         fontWeight: 500,
         zIndex: 200,
-        display: toast.visible ? 'block' : 'none',
         textAlign: 'center',
         boxShadow: '0 4px 20px rgba(0,0,0,0.4)',
-        transition: 'opacity 0.2s',
+        opacity: toast.visible ? 1 : 0,
+        transform: toast.visible ? 'translateY(0)' : 'translateY(10px)',
+        pointerEvents: toast.visible ? 'auto' : 'none',
+        transition: 'opacity 0.25s ease, transform 0.25s ease',
       }}
     >
       {toast.msg}

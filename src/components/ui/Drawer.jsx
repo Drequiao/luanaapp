@@ -1,5 +1,31 @@
+import { useState, useEffect, useCallback } from 'react';
+
 export default function Drawer({ open, onClose, children }) {
-  if (!open) return null;
+  // mounted controla se o DOM existe; visible controla a animação
+  const [mounted, setMounted] = useState(false);
+  const [visible, setVisible] = useState(false);
+
+  useEffect(() => {
+    if (open) {
+      setMounted(true);
+      // Pequeno delay pra garantir que o DOM renderizou antes de animar
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => setVisible(true));
+      });
+    } else {
+      setVisible(false);
+      // Espera a animação de saída antes de desmontar
+      const timer = setTimeout(() => setMounted(false), 300);
+      return () => clearTimeout(timer);
+    }
+  }, [open]);
+
+  const handleClose = useCallback(() => {
+    setVisible(false);
+    setTimeout(onClose, 300);
+  }, [onClose]);
+
+  if (!mounted) return null;
 
   return (
     <div
@@ -10,8 +36,10 @@ export default function Drawer({ open, onClose, children }) {
         zIndex: 100,
         display: 'flex',
         alignItems: 'flex-end',
+        opacity: visible ? 1 : 0,
+        transition: 'opacity 0.3s ease',
       }}
-      onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
+      onClick={(e) => { if (e.target === e.currentTarget) handleClose(); }}
     >
       <div
         style={{
@@ -26,6 +54,8 @@ export default function Drawer({ open, onClose, children }) {
           maxHeight: '92dvh',
           overflowY: 'auto',
           WebkitOverflowScrolling: 'touch',
+          transform: visible ? 'translateY(0)' : 'translateY(100%)',
+          transition: 'transform 0.3s ease',
         }}
         onClick={(e) => e.stopPropagation()}
       >
